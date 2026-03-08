@@ -8,10 +8,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -24,5 +24,25 @@ public class UserController {
         UserRespone result=userService.create(request);
 
         return ApiRespone.<UserRespone>builder().result(result).build();
+    }
+
+    @GetMapping
+    ApiRespone<List<UserRespone>> getAllUsers(){
+        return ApiRespone.<List<UserRespone>>builder()
+                .result(userService.getAll())
+                .build();
+    }
+    @GetMapping("/{email}")
+    ApiRespone<UserRespone> getInfo(@PathVariable String email){
+        return ApiRespone.<UserRespone>builder()
+                .result(userService.getInfo(email))
+                .build();
+    }
+
+    @GetMapping("/myInfo")
+    ApiRespone<UserRespone> getInfo(){
+        return ApiRespone.<UserRespone>builder()
+                .result(userService.getInfo())
+                .build();
     }
 }
