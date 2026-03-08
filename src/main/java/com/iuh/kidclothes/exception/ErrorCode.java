@@ -13,7 +13,8 @@ public enum ErrorCode {
     USERNAME_INVALID(103, "Username must be at least {min} characters!!", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(104, "Password must be at least {min} characters!", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATION(100, "Your account cannot authenticate", HttpStatus.UNAUTHORIZED),
-    UNAUTHORIZED(101, "Your account do not have permission", HttpStatus.FORBIDDEN),;
+    UNAUTHORIZED(101, "Your account do not have permission", HttpStatus.FORBIDDEN),
+    CANNOT_CREATE_TOKEN(106, "Can not create your token", HttpStatus.BAD_REQUEST),;
     private int code;
     private HttpStatusCode statusCode;
     private String message;
