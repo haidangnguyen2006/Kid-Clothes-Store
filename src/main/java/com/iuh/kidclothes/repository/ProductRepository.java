@@ -19,9 +19,4 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
 
-    @Aggregation(pipeline = {
-            "{ $sort: { totalQuantitySold: -1 } }",
-            "{ $limit: ?0 }"
-    })
-    List<TopSellingProductDTO> findTopSellingProducts(int limit);
 }

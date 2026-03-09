@@ -8,6 +8,7 @@ import com.iuh.kidclothes.entity.Product;
 import com.iuh.kidclothes.exception.AppException;
 import com.iuh.kidclothes.exception.ErrorCode;
 import com.iuh.kidclothes.mapper.ProductMapper;
+import com.iuh.kidclothes.repository.OrderRepository;
 import com.iuh.kidclothes.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -25,6 +27,7 @@ import java.util.List;
 public class ProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
+    OrderRepository orderRepository;
 
     // =====================================
     // CHỨC NĂNG DÀNH CHO NHÂN VIÊN
@@ -130,9 +133,9 @@ public class ProductService {
         return productMapper.toProductResponeList(products);
     }
 
-    public List<ProductRespone> getTrendingProducts(int limit) {
+    public List<ProductRespone> getTrendingProducts(LocalDateTime start, LocalDateTime end, int limit) {
         // Xem sản phẩm bán chạy (sắp xếp theo số lượng đã bán)
-        List<TopSellingProductDTO> products = productRepository.findTopSellingProducts(limit);
+        List<TopSellingProductDTO> products= orderRepository.getTopSellingProducts(start, end, limit);
         return productMapper.toProductResponeTop(products);
     }
 }

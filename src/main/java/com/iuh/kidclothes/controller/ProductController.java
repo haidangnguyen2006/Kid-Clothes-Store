@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -100,9 +101,15 @@ public class ProductController {
     // 9. Xem sản phẩm bán chạy
     @GetMapping("/trending")
     public ResponseEntity<ApiRespone<List<ProductRespone>>> getTrendingProducts(
+            @RequestParam String startDate,
+            @RequestParam String endDate,
             @RequestParam(defaultValue = "10") int limit) {
+
+        LocalDateTime start = LocalDateTime.parse(startDate);
+        LocalDateTime end = LocalDateTime.parse(endDate);
+
         return ResponseEntity.ok(ApiRespone.<List<ProductRespone>>builder()
-                .result(productService.getTrendingProducts(limit))
+                .result(productService.getTrendingProducts(start, end, limit))
                 .build());
     }
 }
