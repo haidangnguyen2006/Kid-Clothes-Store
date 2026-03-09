@@ -21,13 +21,3 @@ public class Cart {
     String userId; // Reference to users collection
     List<CartItem> items;
 }
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-class CartItem {
-    String productId;
-    String size;
-    String color;
-    Integer quantity;
-}

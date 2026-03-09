@@ -37,15 +37,3 @@ public class Order {
 
     LocalDateTime createdAt;
 }
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-class OrderItem {
-    private String productId;
-    private String productName; // snapshot tên SP tại thời điểm mua
-    private String size;
-    private String color;
-    private Integer quantity;
-    private Double price; // snapshot giá tại thời điểm mua
-}

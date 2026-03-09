@@ -14,7 +14,10 @@ public enum ErrorCode {
     PASSWORD_INVALID(104, "Password must be at least {min} characters!", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATION(100, "Your account cannot authenticate", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(101, "Your account do not have permission", HttpStatus.FORBIDDEN),
-    CANNOT_CREATE_TOKEN(106, "Can not create your token", HttpStatus.BAD_REQUEST),;
+    CANNOT_CREATE_TOKEN(106, "Can not create your token", HttpStatus.BAD_REQUEST),
+    CART_EMPTY(110,"Cart Empty",HttpStatus.NOT_FOUND),
+    PRODUCT_NOTFOUND(111,"Product not found",HttpStatus.NOT_FOUND),
+    ;
     private int code;
     private HttpStatusCode statusCode;
     private String message;
