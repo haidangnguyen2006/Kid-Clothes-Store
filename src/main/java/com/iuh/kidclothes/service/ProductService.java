@@ -116,4 +116,22 @@ public class ProductService {
         List<Product> products = productRepository.findByNameContainingIgnoreCase(keyword);
         return productMapper.toProductResponeList(products);
     }
+
+    public List<ProductRespone> getProductsByCategory(String categoryId) {
+        // Xem sản phẩm theo danh mục
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        return productMapper.toProductResponeList(products);
+    }
+
+    public List<ProductRespone> filterProductsByPrice(Double minPrice, Double maxPrice) {
+        // Lọc sản phẩm theo giá
+        List<Product> products = productRepository.findByPriceBetween(minPrice, maxPrice);
+        return productMapper.toProductResponeList(products);
+    }
+
+    public List<ProductRespone> getTrendingProducts(int limit) {
+        // Xem sản phẩm bán chạy (sắp xếp theo số lượng đã bán)
+        List<Product> products = productRepository.findTopSellingProducts(limit);
+        return productMapper.toProductResponeList(products);
+    }
 }

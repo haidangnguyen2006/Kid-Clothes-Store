@@ -41,6 +41,30 @@ public class OrderController {
                 .build());
     }
 
+    @GetMapping("/{orderId}")
+    public ResponseEntity<ApiRespone<OrderRespone>> getOrderById(@PathVariable String orderId) {
+        return ResponseEntity.ok(ApiRespone.<OrderRespone>builder()
+                .result(orderService.getOrderById(orderId))
+                .build());
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<ApiRespone<Void>> cancelOrder(@PathVariable String orderId) {
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(ApiRespone.<Void>builder()
+                .message("Hủy đơn hàng thành công")
+                .build());
+    }
+
+    @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<ApiRespone<List<OrderRespone>>> getOrdersByStatus(
+            @PathVariable OrderStatus status) {
+        return ResponseEntity.ok(ApiRespone.<List<OrderRespone>>builder()
+                .result(orderService.getOrdersByStatus(status))
+                .build());
+    }
+
     @PutMapping("/{orderId}/status")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<ApiRespone<OrderRespone>> updateStatus(

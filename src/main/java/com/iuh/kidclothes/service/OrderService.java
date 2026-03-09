@@ -117,6 +117,68 @@ public class OrderService {
         return orderMapper.toOrderResponeList(orders);
     }
 
+    public OrderRespone getOrderById(String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        // Kiểm tra quyền: chỉ user sở hữu hoặc STAFF mới xem được
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_UN_EXISTED));
+
+        if (!order.getUserId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("STAFF")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return orderMapper.toOrderRespone(order);
+    }
+
+    public void cancelOrder(String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_UN_EXISTED));
+
+        // Chỉ user sở hữu hoặc STAFF mới có thể hủy
+        if (!order.getUserId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("STAFF")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Chỉ có thể hủy nếu chưa hoàn thành hoặc đã nhận hàng
+        if (order.getStatus() == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Không thể hủy đơn hàng đã hoàn thành");
+        }
+
+        // Nếu đã trừ tồn kho, cần cộng lại
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            for (OrderItem item : order.getItems()) {
+                Product product = productRepository.findById(item.getProductId())
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
+
+                // Cộng lại tồn kho
+                for (var variant : product.getVariants()) {
+                    if (variant.getSize().equals(item.getSize()) && variant.getColor().equals(item.getColor())) {
+                        variant.setStock(variant.getStock() + item.getQuantity());
+                        break;
+                    }
+                }
+                productRepository.save(product);
+            }
+        }
+
+        order.setStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
+        log.info("Đơn hàng {} đã bị hủy", orderId);
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    public List<OrderRespone> getOrdersByStatus(OrderStatus status) {
+        List<Order> orders = orderRepository.findByStatus(status);
+        return orderMapper.toOrderResponeList(orders);
+    }
+
     @PreAuthorize("hasRole('STAFF')")
     public OrderRespone updateOrderStatus(String orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)

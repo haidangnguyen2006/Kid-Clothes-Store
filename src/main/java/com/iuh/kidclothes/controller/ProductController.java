@@ -77,4 +77,32 @@ public class ProductController {
                 .result(productService.searchProducts(keyword))
                 .build());
     }
+
+    // 7. Xem sản phẩm theo danh mục
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ApiRespone<List<ProductRespone>>> getProductsByCategory(
+            @PathVariable String categoryId) {
+        return ResponseEntity.ok(ApiRespone.<List<ProductRespone>>builder()
+                .result(productService.getProductsByCategory(categoryId))
+                .build());
+    }
+
+    // 8. Lọc sản phẩm theo giá
+    @GetMapping("/filter")
+    public ResponseEntity<ApiRespone<List<ProductRespone>>> filterByPrice(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice) {
+        return ResponseEntity.ok(ApiRespone.<List<ProductRespone>>builder()
+                .result(productService.filterProductsByPrice(minPrice, maxPrice))
+                .build());
+    }
+
+    // 9. Xem sản phẩm bán chạy
+    @GetMapping("/trending")
+    public ResponseEntity<ApiRespone<List<ProductRespone>>> getTrendingProducts(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(ApiRespone.<List<ProductRespone>>builder()
+                .result(productService.getTrendingProducts(limit))
+                .build());
+    }
 }
