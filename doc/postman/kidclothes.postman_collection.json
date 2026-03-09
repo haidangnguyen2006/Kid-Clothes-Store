@@ -1,0 +1,440 @@
+{
+  "info": {
+    "name": "KidClothes API (v1)",
+    "_postman_id": "kidclothes-collection-001",
+    "description": "Postman collection for KidClothes backend. Import into Postman and set the collection variable `authToken` after signing in.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "authToken", "value": "" },
+    { "key": "userEmail", "value": "user@example.com" },
+    { "key": "productId", "value": "67a1234567..." },
+    { "key": "categoryId", "value": "67a1234560..." },
+    { "key": "orderId", "value": "67a1234567..." },
+    { "key": "role", "value": "USER" },
+    { "key": "status", "value": "PENDING_DELIVERY" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign In - POST /auth/signin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/signin", "host": ["{{baseUrl}}"], "path": ["auth","signin"] },
+            "description": "Đăng nhập, trả về JWT token trong result.token. Sau khi chạy thành công, copy token vào collection variable `authToken` (without the \"Bearer \" prefix) or use the Tests script below to set it automatically."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// If response contains result.token, set it to collection variable authToken",
+                  "try {",
+                  "  const res = pm.response.json();",
+                  "  if (res && res.result && res.result.token) {",
+                  "    pm.collectionVariables.set('authToken', res.result.token);",
+                  "    console.log('authToken set to collection variable');",
+                  "  }",
+                  "} catch (e) { console.log('No token found in response'); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Introspect - POST /auth/introspect",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"{{authToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/introspect", "host": ["{{baseUrl}}"], "path": ["auth","introspect"] },
+            "description": "Kiểm tra tính hợp lệ của token. Uses collection variable `authToken`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Register - POST /users",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"0123456789\",\n  \"address\": \"123 Đường ABC, TP.HCM\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "Tạo tài khoản mới"
+          }
+        },
+        {
+          "name": "Get My Info - GET /users/myInfo",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/myInfo", "host": ["{{baseUrl}}"], "path": ["users","myInfo"] },
+            "description": "Lấy thông tin user hiện tại"
+          }
+        },
+        {
+          "name": "Get User by Email - GET /users/:email",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/{{userEmail}}", "host": ["{{baseUrl}}"], "path": ["users","{{userEmail}}"] },
+            "description": "Chỉ STAFF có quyền truy cập. Thay đổi collection variable `userEmail` trước khi gửi."
+          }
+        },
+        {
+          "name": "Update My Info - PUT /users/myInfo",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Nguyễn Văn A Updated\",\n  \"phone\": \"0987654321\",\n  \"address\": \"456 Đường XYZ, TP.HCM\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/myInfo", "host": ["{{baseUrl}}"], "path": ["users","myInfo"] },
+            "description": "Cập nhật thông tin người dùng đang đăng nhập"
+          }
+        },
+        {
+          "name": "Change Password - PUT /users/change-password",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"oldPassword\": \"oldPassword123\",\n  \"newPassword\": \"newPassword456\",\n  \"confirmPassword\": \"newPassword456\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/change-password", "host": ["{{baseUrl}}"], "path": ["users","change-password"] },
+            "description": "Đổi mật khẩu (user phải cung cấp oldPassword)"
+          }
+        },
+        {
+          "name": "Update User (STAFF) - PUT /users/:email",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"User Updated by Staff\",\n  \"phone\": \"0999999999\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/{{userEmail}}", "host": ["{{baseUrl}}"], "path": ["users","{{userEmail}}"] },
+            "description": "Cập nhật người dùng bởi STAFF"
+          }
+        },
+        {
+          "name": "Delete User (STAFF) - DELETE /users/:email",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/{{userEmail}}", "host": ["{{baseUrl}}"], "path": ["users","{{userEmail}}"] },
+            "description": "Xóa user (STAFF)"
+          }
+        },
+        {
+          "name": "Search Users - GET /users/search?keyword=",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/search?keyword=Nguyễn", "host": ["{{baseUrl}}"], "path": ["users","search"], "query": [ { "key": "keyword", "value": "Nguyễn" } ] },
+            "description": "Tìm kiếm người dùng theo tên"
+          }
+        },
+        {
+          "name": "Get All Users (STAFF) - GET /users",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "Danh sách tất cả user (STAFF)"
+          }
+        },
+        {
+          "name": "Get Users by Role (STAFF) - GET /users/role/:role",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/role/{{role}}", "host": ["{{baseUrl}}"], "path": ["users","role","{{role}}"] },
+            "description": "Lấy danh sách user theo role (USER/STAFF)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "item": [
+        {
+          "name": "List Categories - GET /categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+            "description": "Danh sách danh mục (public)"
+          }
+        },
+        {
+          "name": "Get Category - GET /categories/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categories","{{categoryId}}"] },
+            "description": "Chi tiết danh mục"
+          }
+        },
+        {
+          "name": "Create Category (STAFF) - POST /categories",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Quần áo thể thao\",\n  \"description\": \"Các loại quần áo thể thao\"\n}" },
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+            "description": "Tạo danh mục mới (STAFF)"
+          }
+        },
+        {
+          "name": "Update Category (STAFF) - PUT /categories/:id",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Quần áo thể thao - Updated\",\n  \"description\": \"Cập nhật mô tả\"\n}" },
+            "url": { "raw": "{{baseUrl}}/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categories","{{categoryId}}"] },
+            "description": "Cập nhật danh mục (STAFF)"
+          }
+        },
+        {
+          "name": "Delete Category (STAFF) - DELETE /categories/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["categories","{{categoryId}}"] },
+            "description": "Xóa danh mục (STAFF)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "List Products - GET /products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] },
+            "description": "Danh sách sản phẩm (public)"
+          }
+        },
+        {
+          "name": "Get Product - GET /products/:id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products","{{productId}}"] },
+            "description": "Chi tiết sản phẩm"
+          }
+        },
+        {
+          "name": "Search Products - GET /products/search?keyword=",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/search?keyword=áo", "host": ["{{baseUrl}}"], "path": ["products","search"], "query": [ { "key": "keyword", "value": "áo" } ] },
+            "description": "Tìm kiếm sản phẩm theo tên"
+          }
+        },
+        {
+          "name": "Products by Category - GET /products/category/:categoryId",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/category/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["products","category","{{categoryId}}"] },
+            "description": "Lọc sản phẩm theo danh mục"
+          }
+        },
+        {
+          "name": "Filter by Price - GET /products/filter",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/filter?minPrice=100000&maxPrice=200000", "host": ["{{baseUrl}}"], "path": ["products","filter"], "query": [ { "key": "minPrice", "value": "100000" }, { "key": "maxPrice", "value": "200000" } ] },
+            "description": "Lọc sản phẩm theo khoảng giá"
+          }
+        },
+        {
+          "name": "Trending Products - GET /products/trending",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/products/trending?limit=5", "host": ["{{baseUrl}}"], "path": ["products","trending"], "query": [ { "key": "limit", "value": "5" } ] },
+            "description": "Sản phẩm bán chạy"
+          }
+        },
+        {
+          "name": "Create Product (STAFF) - POST /products",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Áo thun trẻ em\",\n  \"price\": 150000,\n  \"categoryId\": \"{{categoryId}}\",\n  \"description\": \"Áo thun chất lượng cao\",\n  \"images\": [\"https://example.com/img1.jpg\"],\n  \"variants\": [\n    { \"size\": \"S\", \"color\": \"RED\", \"stock\": 10 },\n    { \"size\": \"M\", \"color\": \"BLUE\", \"stock\": 5 }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] },
+            "description": "Tạo sản phẩm mới (STAFF)"
+          }
+        },
+        {
+          "name": "Update Product (STAFF) - PUT /products/:id",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Áo thun trẻ em - Updated\",\n  \"price\": 160000,\n  \"description\": \"Cập nhật mô tả\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products","{{productId}}"] },
+            "description": "Cập nhật sản phẩm (STAFF)"
+          }
+        },
+        {
+          "name": "Delete Product (STAFF) - DELETE /products/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}", "host": ["{{baseUrl}}"], "path": ["products","{{productId}}"] },
+            "description": "Xóa sản phẩm (STAFF)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Get Cart - GET /cart",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/cart", "host": ["{{baseUrl}}"], "path": ["cart"] },
+            "description": "Lấy giỏ hàng của user đang đăng nhập"
+          }
+        },
+        {
+          "name": "Add Item - POST /cart/items",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"size\": \"M\",\n  \"color\": \"RED\",\n  \"quantity\": 2\n}" },
+            "url": { "raw": "{{baseUrl}}/cart/items", "host": ["{{baseUrl}}"], "path": ["cart","items"] },
+            "description": "Thêm sản phẩm vào giỏ hàng"
+          }
+        },
+        {
+          "name": "Update Item - PUT /cart/items/:productId",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/cart/items/{{productId}}?size=M&color=RED&quantity=3", "host": ["{{baseUrl}}"], "path": ["cart","items","{{productId}}"], "query": [ { "key": "size", "value": "M" }, { "key": "color", "value": "RED" }, { "key": "quantity", "value": "3" } ] },
+            "description": "Cập nhật số lượng sản phẩm trong giỏ"
+          }
+        },
+        {
+          "name": "Delete Item - DELETE /cart/items/:productId",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/cart/items/{{productId}}?size=M&color=RED", "host": ["{{baseUrl}}"], "path": ["cart","items","{{productId}}"], "query": [ { "key": "size", "value": "M" }, { "key": "color", "value": "RED" } ] },
+            "description": "Xóa sản phẩm khỏi giỏ"
+          }
+        },
+        {
+          "name": "Clear Cart - DELETE /cart",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/cart", "host": ["{{baseUrl}}"], "path": ["cart"] },
+            "description": "Xóa toàn bộ giỏ hàng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Create Order - POST /orders",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"receiverName\": \"Nguyễn Văn A\",\n  \"receiverPhone\": \"0123456789\",\n  \"shippingAddress\": \"123 Đường ABC, TP.HCM\",\n  \"paymentMethod\": \"COD\"\n}" },
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "description": "Tạo đơn từ giỏ hàng"
+          }
+        },
+        {
+          "name": "My Orders - GET /orders/my-orders",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/my-orders", "host": ["{{baseUrl}}"], "path": ["orders","my-orders"] },
+            "description": "Danh sách đơn hàng của user"
+          }
+        },
+        {
+          "name": "Get Order - GET /orders/:orderId",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["orders","{{orderId}}"] },
+            "description": "Chi tiết đơn hàng (owner or STAFF)"
+          }
+        },
+        {
+          "name": "Cancel Order - DELETE /orders/:orderId",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["orders","{{orderId}}"] },
+            "description": "Hủy đơn hàng"
+          }
+        },
+        {
+          "name": "Orders by Status (STAFF) - GET /orders/status/:status",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/status/{{status}}", "host": ["{{baseUrl}}"], "path": ["orders","status","{{status}}"] },
+            "description": "Lấy đơn theo trạng thái (STAFF)"
+          }
+        },
+        {
+          "name": "Update Order Status (STAFF) - PUT /orders/:orderId/status",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/{{orderId}}/status?status=DELIVERING", "host": ["{{baseUrl}}"], "path": ["orders","{{orderId}}","status"], "query": [ { "key": "status", "value": "DELIVERING" } ] },
+            "description": "Cập nhật trạng thái đơn (STAFF)"
+          }
+        },
+        {
+          "name": "Revenue Statistics (STAFF) - GET /orders/statistics/revenue",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/statistics/revenue?year=2026", "host": ["{{baseUrl}}"], "path": ["orders","statistics","revenue"], "query": [ { "key": "year", "value": "2026" } ] },
+            "description": "Thống kê doanh thu theo tháng (STAFF)"
+          }
+        },
+        {
+          "name": "Top Users (STAFF) - GET /orders/statistics/top-users",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/statistics/top-users", "host": ["{{baseUrl}}"], "path": ["orders","statistics","top-users"] },
+            "description": "Khách hàng chi tiêu cao nhất (STAFF)"
+          }
+        },
+        {
+          "name": "Top Products (STAFF) - GET /orders/statistics/top-products",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/orders/statistics/top-products?startDate=2026-01-01T00:00:00&endDate=2026-03-09T23:59:59&limit=5", "host": ["{{baseUrl}}"], "path": ["orders","statistics","top-products"], "query": [ { "key": "startDate", "value": "2026-01-01T00:00:00" }, { "key": "endDate", "value": "2026-03-09T23:59:59" }, { "key": "limit", "value": "5" } ] },
+            "description": "Sản phẩm bán chạy nhất (STAFF)"
+          }
+        }
+      ]
+    }
+  ]
+}
+

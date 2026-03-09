@@ -119,7 +119,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Token Expiration
 
-- **Access Token:** 1 giờ
+- **Access Token:** 7 ngày
 - Sau khi hết hạn, client cần đăng nhập lại
 
 ---
