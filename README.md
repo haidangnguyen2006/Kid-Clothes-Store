@@ -158,7 +158,7 @@ MIT © 2026 — Bạn có thể sử dụng, sửa đổi và phân phối theo 
 ---
 
 ## Liên hệ
-Nếu có câu hỏi, liên hệ với nhóm phát triển tại: `nguyenhaidangnt2006@gmail.com` .
+Nếu có câu hỏi, liên hệ với nhóm phát triển tại: `dev-team@example.com` (thay bằng địa chỉ thực tế của bạn).
 
 Cảm ơn bạn đã sử dụng KidClothes! ❤️
 
