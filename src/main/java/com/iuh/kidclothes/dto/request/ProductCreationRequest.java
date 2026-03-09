@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import com.iuh.kidclothes.dto.request.ProductVariantDTO;
+import com.iuh.kidclothes.dto.ProductVariantDTO;
 import java.util.List;
 
 @Data
