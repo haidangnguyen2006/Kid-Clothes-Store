@@ -1,6 +1,7 @@
 package com.iuh.kidclothes.service;
 
 import com.iuh.kidclothes.dto.request.UserCreationRequest;
+import com.iuh.kidclothes.dto.request.UserUpdateRequest;
 import com.iuh.kidclothes.dto.respone.UserRespone;
 import com.iuh.kidclothes.entity.User;
 import com.iuh.kidclothes.enums.Role;
@@ -41,7 +42,6 @@ public class UserService {
         return userMapper.toUserRespone(user);
     }
 
-    @PreAuthorize("hasRole('STAFF')")
     public List<UserRespone> getAll(){
         List<User> users=userRepository.findAll();
         return userMapper.toUserRespone(users);
@@ -57,10 +57,63 @@ public class UserService {
 
     public UserRespone getInfo(){
         var context= SecurityContextHolder.getContext();
-
+        log.info("Email: "+context.getAuthentication().getName());
         User user = userRepository.findByEmail(context.getAuthentication().getName())
                 .orElseThrow(()->new AppException(ErrorCode.USER_UN_EXISTED));
 
         return userMapper.toUserRespone(user);
+    }
+
+    public UserRespone updateMyInfo(UserUpdateRequest request){
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new AppException(ErrorCode.USER_UN_EXISTED));
+
+        userMapper.updateUser(user, request);
+
+        if(request.getPassword() != null && !request.getPassword().isBlank()){
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        user = userRepository.save(user);
+        return userMapper.toUserRespone(user);
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    public UserRespone updateUser(String email, UserUpdateRequest request){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new AppException(ErrorCode.USER_UN_EXISTED));
+
+        userMapper.updateUser(user, request);
+
+        if(request.getPassword() != null && !request.getPassword().isBlank()){
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        user = userRepository.save(user);
+        return userMapper.toUserRespone(user);
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    public void deleteUser(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new AppException(ErrorCode.USER_UN_EXISTED));
+
+        userRepository.delete(user);
+        log.info("User with email {} has been deleted", email);
+    }
+
+    public List<UserRespone> searchUsers(String keyword){
+        List<User> users = userRepository.findByFullNameContainingIgnoreCase(keyword);
+        return userMapper.toUserRespone(users);
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    public List<UserRespone> getAllUsersByRole(String role){
+        Role roleEnum = Role.valueOf(role.toUpperCase());
+        List<User> users = userRepository.findByRole(roleEnum);
+        return userMapper.toUserRespone(users);
     }
 }

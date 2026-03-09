@@ -29,6 +29,7 @@ public class ApplicationInitConfig {
                         .role(Role.STAFF)
                         .fullName("admin")
                         .build();
+                userRepository.save(user);
                 log.warn("ADMIN account create Succesfully with default password:12345678, Please change password for the security");
             }
         };
