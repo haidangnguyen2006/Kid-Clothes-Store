@@ -1,5 +1,6 @@
 package com.iuh.kidclothes.mapper;
 
+import com.iuh.kidclothes.dto.TopSellingProductDTO;
 import com.iuh.kidclothes.dto.request.ProductCreationRequest;
 import com.iuh.kidclothes.dto.request.ProductUpdateRequest;
 import com.iuh.kidclothes.dto.respone.ProductRespone;
@@ -16,6 +17,8 @@ public interface ProductMapper {
     ProductRespone toProductRespone(Product product);
 
     List<ProductRespone> toProductResponeList(List<Product> products);
+
+    List<ProductRespone> toProductResponeTop(List<TopSellingProductDTO> products);
 
     void updateProduct(@MappingTarget Product product, ProductUpdateRequest request);
 }

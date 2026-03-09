@@ -1,7 +1,9 @@
 package com.iuh.kidclothes.repository;
 
 
+import com.iuh.kidclothes.dto.TopSellingProductDTO;
 import com.iuh.kidclothes.entity.Product;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,6 +19,9 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
 
-    @Query(sort = "{ 'sold': -1 }")
-    List<Product> findTopSellingProducts(int limit);
+    @Aggregation(pipeline = {
+            "{ $sort: { totalQuantitySold: -1 } }",
+            "{ $limit: ?0 }"
+    })
+    List<TopSellingProductDTO> findTopSellingProducts(int limit);
 }

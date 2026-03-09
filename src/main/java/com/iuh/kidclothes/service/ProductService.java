@@ -1,5 +1,6 @@
 package com.iuh.kidclothes.service;
 
+import com.iuh.kidclothes.dto.TopSellingProductDTO;
 import com.iuh.kidclothes.dto.request.ProductCreationRequest;
 import com.iuh.kidclothes.dto.request.ProductUpdateRequest;
 import com.iuh.kidclothes.dto.respone.ProductRespone;
@@ -131,7 +132,7 @@ public class ProductService {
 
     public List<ProductRespone> getTrendingProducts(int limit) {
         // Xem sản phẩm bán chạy (sắp xếp theo số lượng đã bán)
-        List<Product> products = productRepository.findTopSellingProducts(limit);
-        return productMapper.toProductResponeList(products);
+        List<TopSellingProductDTO> products = productRepository.findTopSellingProducts(limit);
+        return productMapper.toProductResponeTop(products);
     }
 }
