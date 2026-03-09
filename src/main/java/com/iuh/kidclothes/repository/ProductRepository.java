@@ -3,6 +3,7 @@ package com.iuh.kidclothes.repository;
 
 import com.iuh.kidclothes.entity.Product;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,4 +14,9 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findByNameContainingIgnoreCase(String keyword);
 
     List<Product> findByCategoryId(String categoryId);
+
+    List<Product> findByPriceBetween(Double minPrice, Double maxPrice);
+
+    @Query(sort = "{ 'sold': -1 }")
+    List<Product> findTopSellingProducts(int limit);
 }

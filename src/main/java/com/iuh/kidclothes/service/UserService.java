@@ -1,5 +1,6 @@
 package com.iuh.kidclothes.service;
 
+import com.iuh.kidclothes.dto.request.ChangePasswordRequest;
 import com.iuh.kidclothes.dto.request.UserCreationRequest;
 import com.iuh.kidclothes.dto.request.UserUpdateRequest;
 import com.iuh.kidclothes.dto.respone.UserRespone;
@@ -115,5 +116,28 @@ public class UserService {
         Role roleEnum = Role.valueOf(role.toUpperCase());
         List<User> users = userRepository.findByRole(roleEnum);
         return userMapper.toUserRespone(users);
+    }
+
+    public void changePassword(ChangePasswordRequest request){
+        // Kiểm tra mật khẩu mới và xác nhận mật khẩu
+        if(!request.getNewPassword().equals(request.getConfirmPassword())){
+            throw new AppException(ErrorCode.PASSWORD_INVALID);
+        }
+
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new AppException(ErrorCode.USER_UN_EXISTED));
+
+        // Kiểm tra mật khẩu cũ
+        if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
+            throw new RuntimeException("Mật khẩu cũ không chính xác");
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        log.info("User {} đã đổi mật khẩu thành công", email);
     }
 }

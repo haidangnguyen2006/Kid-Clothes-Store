@@ -25,12 +25,3 @@ public class Product {
     private List<String> images; // Lưu URL hình ảnh
     private List<ProductVariant> variants;
 }
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-class ProductVariant {
-    private String size;
-    private String color;
-    private Integer stock; // Tồn kho cho riêng size/màu này
-}

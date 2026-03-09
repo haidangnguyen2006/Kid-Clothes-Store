@@ -1,14 +1,23 @@
 package com.iuh.kidclothes.exception;
 
 import com.iuh.kidclothes.dto.respone.ApiRespone;
+import jakarta.validation.ConstraintViolation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Map;
+import java.util.Objects;
+
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-   /* @ExceptionHandler(value = Exception.class)
+    private static final String MIN_ATTRIBUTE = "min";
+
+    @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiRespone> handlingException(Exception exception){
         ErrorCode errorCode=ErrorCode.UNCATEGORIZED;
         return ResponseEntity.status(errorCode.getStatusCode())
@@ -19,7 +28,7 @@ public class GlobalExceptionHandler {
                                 .build()
 
         );
-    }*/
+    }
 
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiRespone> handlingAppException(AppException exception){
@@ -42,5 +51,39 @@ public class GlobalExceptionHandler {
                                 .code(errorCode.getCode())
                                 .result(errorCode.getMessage())
                                 .build());
+    }
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    ResponseEntity<ApiRespone> handlingMeMethodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
+        String enumkey = exception.getFieldError().getDefaultMessage();
+        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+        Map<String, Object> attributes = Map.of();
+        try {
+            errorCode = ErrorCode.valueOf(enumkey);
+            var constraintViolation =
+                    exception
+                            .getBindingResult()
+                            .getAllErrors()
+                            .getFirst()
+                            .unwrap(ConstraintViolation.class);
+            attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+            log.warn("Validation attributes: {}", attributes);
+        } catch (IllegalArgumentException e) {
+
+        }
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(
+                        ApiRespone.builder()
+                                .code(errorCode.getCode())
+                                .message(
+                                        Objects.nonNull(attributes)
+                                                ? mapAtributes(attributes, errorCode.getMessage())
+                                                : errorCode.getMessage())
+                                .build());
+    }
+
+    private String mapAtributes(Map<String, Object> attributes, String message) {
+        String min = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+        return message.replace("{" + MIN_ATTRIBUTE + "}", min);
     }
 }

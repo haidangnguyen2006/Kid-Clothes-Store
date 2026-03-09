@@ -20,7 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINT={"/auth/signin","/users"};
+    private final String[] POST_PUBLIC_ENDPOINT={"/auth/signin","/users"};
+    private final String[] GET_PUBLIC_ENDPOINT={"/products","/products/{id}","/products/search"};
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -33,7 +34,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
+                        .requestMatchers(HttpMethod.POST, POST_PUBLIC_ENDPOINT).permitAll()
+
+                        .requestMatchers(HttpMethod.GET,GET_PUBLIC_ENDPOINT).permitAll()
 
                         .anyRequest().authenticated()
                 );

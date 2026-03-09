@@ -1,5 +1,6 @@
 package com.iuh.kidclothes.controller;
 
+import com.iuh.kidclothes.dto.request.ChangePasswordRequest;
 import com.iuh.kidclothes.dto.request.UserCreationRequest;
 import com.iuh.kidclothes.dto.request.UserUpdateRequest;
 import com.iuh.kidclothes.dto.respone.ApiRespone;
@@ -91,6 +92,15 @@ public class UserController {
             @PathVariable String role){
         List<UserRespone> result = userService.getAllUsersByRole(role);
         return ResponseEntity.ok(ApiRespone.<List<UserRespone>>builder().result(result).build());
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiRespone<Void>> changePassword(
+            @RequestBody @Valid ChangePasswordRequest request){
+        userService.changePassword(request);
+        return ResponseEntity.ok(ApiRespone.<Void>builder()
+                .message("Đổi mật khẩu thành công")
+                .build());
     }
 }
 
