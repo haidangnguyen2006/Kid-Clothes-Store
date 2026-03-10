@@ -20,6 +20,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiRespone> handlingException(Exception exception){
         ErrorCode errorCode=ErrorCode.UNCATEGORIZED;
+        log.error(exception.getMessage(),exception);
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(
                         ApiRespone.builder()
@@ -69,7 +70,7 @@ public class GlobalExceptionHandler {
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
             log.warn("Validation attributes: {}", attributes);
         } catch (IllegalArgumentException e) {
-
+            log.error(exception.getMessage(),exception);
         }
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(
@@ -81,6 +82,7 @@ public class GlobalExceptionHandler {
                                                 : errorCode.getMessage())
                                 .build());
     }
+    @ExceptionHandler(value = IllegalArgumentException.class)
 
     private String mapAtributes(Map<String, Object> attributes, String message) {
         String min = String.valueOf(attributes.get(MIN_ATTRIBUTE));
