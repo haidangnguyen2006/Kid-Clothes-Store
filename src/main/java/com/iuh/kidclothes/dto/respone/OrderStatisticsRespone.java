@@ -11,6 +11,6 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderStatisticsRespone {
-    Double totalRevenue;
+    Double totalAmount;
     LocalDateTime createdAt;
 }
