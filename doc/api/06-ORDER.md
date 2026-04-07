@@ -98,7 +98,7 @@ Authorization: Bearer <token>
 			"receiverName": "Nguyễn Văn A",
 			"receiverPhone": "0123456789",
 			"shippingAddress": "123 Đường ABC, TP.HCM",
-			"items": [...],
+			"items": [],
 			"totalAmount": 330000,
 			"shippingFee": 30000,
 			"paymentMethod": "COD",
@@ -281,7 +281,7 @@ PUT /api/orders/67a1234567.../status?status=DELIVERING
 		"userId": "67a1234500...",
 		"receiverName": "Nguyễn Văn A",
 		"shippingAddress": "123 Đường ABC, TP.HCM",
-		"items": [...],
+			"items": [],
 		"totalAmount": 330000,
 		"shippingFee": 30000,
 		"paymentMethod": "COD",
@@ -338,6 +338,72 @@ GET /api/orders/statistics/revenue?year=2026
 ```
 
 ---
+
+### GET /api/orders/statistics/orders
+
+> Lấy danh sách thống kê đơn hàng trong khoảng thời gian (dùng cho việc vẽ biểu đồ — mỗi mục tương ứng một đơn hàng với thông tin doanh thu và thời điểm tạo). Chỉ STAFF có quyền truy cập.
+
+#### Headers Required
+
+```
+Authorization: Bearer <token> (STAFF role)
+```
+
+#### Query Parameters
+
+| Tên  | Loại   | Bắt buộc | Mô tả |
+| :--- | :----- | :------- | :---- |
+| from | string | Có       | Thời điểm bắt đầu (ISO-8601, ví dụ: 2026-01-01T00:00:00) |
+| to   | string | Có       | Thời điểm kết thúc (ISO-8601, ví dụ: 2026-03-31T23:59:59) |
+
+> Lưu ý: server sử dụng `LocalDateTime.parse(...)` trong controller — đảm bảo format đúng (yyyy-MM-dd'T'HH:mm:ss). Nếu cần timezone, frontend nên truyền theo UTC hoặc server sẽ dùng LocalDateTime không kèm timezone.
+
+#### Ví dụ Request
+
+```
+GET /api/orders/statistics/orders?from=2026-01-01T00:00:00&to=2026-03-31T23:59:59
+Authorization: Bearer eyJ... (STAFF)
+```
+
+#### Ví dụ Response (200 OK)
+
+```json
+{
+  "code": 1000,
+  "result": [
+    {
+      "totalRevenue": 330000,
+      "createdAt": "2026-03-09T10:30:00"
+    },
+    {
+      "totalRevenue": 150000,
+      "createdAt": "2026-03-08T14:20:00"
+    }
+  ]
+}
+```
+
+#### Mô tả trường trả về
+
+| Tên | Loại | Mô tả |
+|-----|------|-------|
+| totalRevenue | number | Tổng giá trị đơn hàng (totalAmount) tại thời điểm createdAt |
+| createdAt | string (ISO) | Thời gian tạo đơn hàng (dùng để vẽ trục X cho biểu đồ) |
+
+#### Ví dụ sử dụng
+
+- Frontend có thể nhóm hoặc gộp theo ngày/tháng để vẽ biểu đồ (sum totalRevenue theo ngày). Endpoint trả về list đơn hàng; nếu cần dữ liệu đã gộp, frontend hoặc backend có thể thực hiện bước gộp thêm.
+
+#### Ví dụ Response (400 Bad Request - Thiếu/parse lỗi)
+
+```json
+{
+  "code": 103,
+  "message": "Invalid date format for 'from' or 'to'",
+  "result": null
+}
+```
+
 
 ### GET /api/orders/statistics/top-users
 

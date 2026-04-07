@@ -23,7 +23,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,5 +200,12 @@ public class OrderService {
     @PreAuthorize("hasRole('STAFF')")
     public List<TopSellingProductDTO> getTopSellingProducts(LocalDateTime start, LocalDateTime end, int limit) {
         return orderRepository.getTopSellingProducts(start, end, limit);
+    }
+    public List<OrderStatisticsRespone> getAllOrders(LocalDateTime from, LocalDateTime to) {
+        List<Order> orders = orderRepository.findAll().stream()
+                .filter(order -> order.getCreatedAt().isAfter(from) && order.getCreatedAt().isBefore(to))
+                .collect(Collectors.toList());
+
+        return orderMapper.toOrderStatisticsResponeList(orders);
     }
 }

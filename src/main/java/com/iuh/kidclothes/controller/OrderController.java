@@ -83,7 +83,16 @@ public class OrderController {
                 .result(orderService.getMonthlyRevenue(year))
                 .build());
     }
-
+    @GetMapping("/statistics/orders")
+    @PreAuthorize("hasRole('STAFF')")
+    public ResponseEntity<ApiRespone<List<OrderStatisticsRespone>>> getAllOrders(
+            @RequestParam(name = "from") LocalDateTime from,
+            @RequestParam(name = "to") LocalDateTime to
+    ) {
+    return ResponseEntity.ok(ApiRespone.<List<OrderStatisticsRespone>>builder()
+            .result(orderService.getAllOrders(from, to))
+            .build());
+    }
     @GetMapping("/statistics/top-users")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<ApiRespone<List<UserSpendingDTO>>> getTopUsers() {
