@@ -56,14 +56,13 @@ public interface OrderRepository extends MongoRepository<Order, String> {
             "{ '$lookup': { 'from': 'products', 'localField': 'productObjId', 'foreignField': '_id', 'as': 'productInfo' } }",
             "{ '$unwind': '$productInfo' }",
             "{ '$project': { " +
-                    "'id': '$_id', " +
+                    "'_id': '$_id', " +
                     "'categoryId': '$productInfo.categoryId', " +
                     "'name': '$productInfo.name', " +
                     "'price': '$productInfo.price', " +
                     "'description': '$productInfo.description', " +
                     "'images': '$productInfo.images', " +
                     "'variants': '$productInfo.variants', " +
-                    "'_id': 0 " +
                     "} }"
     })
     List<ProductRespone> getTopSellingProductsFullInfo(LocalDateTime startDate, LocalDateTime endDate, int limit);
