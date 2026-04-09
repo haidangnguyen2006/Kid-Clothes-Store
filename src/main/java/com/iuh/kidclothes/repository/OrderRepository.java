@@ -3,6 +3,7 @@ package com.iuh.kidclothes.repository;
 import com.iuh.kidclothes.dto.MonthlyRevenueDTO;
 import com.iuh.kidclothes.dto.TopSellingProductDTO;
 import com.iuh.kidclothes.dto.UserSpendingDTO;
+import com.iuh.kidclothes.dto.respone.ProductRespone;
 import com.iuh.kidclothes.entity.Order;
 import com.iuh.kidclothes.enums.OrderStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -19,10 +20,6 @@ public interface OrderRepository extends MongoRepository<Order, String> {
 
     List<Order> findByStatus(OrderStatus status);
 
-    /**
-     * 1. Sắp xếp người dùng theo tổng số tiền mua hàng
-     * Nguyễn Hải Đăng
-     */
     @Aggregation(pipeline = {
             "{ '$match': { 'status': 'COMPLETED' } }",
             "{ '$group': { '_id': '$userId', 'totalSpent': { '$sum': '$totalAmount' } } }",
@@ -31,9 +28,6 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     })
     List<UserSpendingDTO> getTopUsersBySpending();
 
-    /**
-     * 2. Thống kê / báo cáo doanh thu theo tháng
-     */
     @Aggregation(pipeline = {
             "{ '$match': { 'status': 'COMPLETED', '$expr': { '$eq': [{ '$year': '$createdAt' }, ?0] } } }",
             "{ '$group': { '_id': { '$month': '$createdAt' }, 'totalRevenue': { '$sum': '$totalAmount' }, 'totalOrders': { '$sum': 1 } } }",
@@ -42,11 +36,6 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     })
     List<MonthlyRevenueDTO> getRevenueByMonth(int year);
 
-    /**
-     * 3. Xem sản phẩm bán chạy nhất trong tuần/tháng
-     * Người thực hiện: Nguyễn Ngọc Hậu
-     * Tham số: ?0 (startDate), ?1 (endDate), ?2 (limit - giới hạn số kết quả trả về)
-     */
     @Aggregation(pipeline = {
             "{ '$match': { 'createdAt': { '$gte': ?0, '$lte': ?1 }, 'status': 'COMPLETED' } }",
             "{ '$unwind': '$items' }",
@@ -56,4 +45,26 @@ public interface OrderRepository extends MongoRepository<Order, String> {
             "{ '$limit': ?2 }"
     })
     List<TopSellingProductDTO> getTopSellingProducts(LocalDateTime startDate, LocalDateTime endDate, int limit);
+
+    @Aggregation(pipeline = {
+            "{ '$match': { 'createdAt': { '$gte': ?0, '$lte': ?1 }, 'status': 'COMPLETED' } }",
+            "{ '$unwind': '$items' }",
+            "{ '$group': { '_id': '$items.productId', 'totalQuantitySold': { '$sum': '$items.quantity' } } }",
+            "{ '$sort': { 'totalQuantitySold': -1 } }",
+            "{ '$limit': ?2 }",
+            "{ '$addFields': { 'productObjId': { '$toObjectId': '$_id' } } }",
+            "{ '$lookup': { 'from': 'products', 'localField': 'productObjId', 'foreignField': '_id', 'as': 'productInfo' } }",
+            "{ '$unwind': '$productInfo' }",
+            "{ '$project': { " +
+                    "'id': '$_id', " +
+                    "'categoryId': '$productInfo.categoryId', " +
+                    "'name': '$productInfo.name', " +
+                    "'price': '$productInfo.price', " +
+                    "'description': '$productInfo.description', " +
+                    "'images': '$productInfo.images', " +
+                    "'variants': '$productInfo.variants', " +
+                    "'_id': 0 " +
+                    "} }"
+    })
+    List<ProductRespone> getTopSellingProductsFullInfo(LocalDateTime startDate, LocalDateTime endDate, int limit);
 }

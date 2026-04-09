@@ -135,7 +135,7 @@ public class ProductService {
 
     public List<ProductRespone> getTrendingProducts(LocalDateTime start, LocalDateTime end, int limit) {
         // Xem sản phẩm bán chạy (sắp xếp theo số lượng đã bán)
-        List<TopSellingProductDTO> products= orderRepository.getTopSellingProducts(start, end, limit);
-        return productMapper.toProductResponeTop(products);
+        List<ProductRespone> products= orderRepository.getTopSellingProductsFullInfo(start, end, limit);
+        return products;
     }
 }
