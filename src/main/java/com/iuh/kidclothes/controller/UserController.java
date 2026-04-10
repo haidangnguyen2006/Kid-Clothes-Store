@@ -54,14 +54,14 @@ public class UserController {
                 .build());
     }
 
-    @PutMapping("/myInfo")
+    @PatchMapping("/myInfo")
     public ResponseEntity<ApiRespone<UserRespone>> updateMyInfo(
             @RequestBody @Valid UserUpdateRequest request){
         UserRespone result = userService.updateMyInfo(request);
         return ResponseEntity.ok(ApiRespone.<UserRespone>builder().result(result).build());
     }
 
-    @PutMapping("/{email}")
+    @PatchMapping("/{email}")
     @PreAuthorize("hasRole('STAFF')")
     public ResponseEntity<ApiRespone<UserRespone>> updateUser(
             @PathVariable String email,
